@@ -1,0 +1,30 @@
+<?php
+/**
+ * Autoloader
+ * PSR-4 compatible autoloader
+ */
+
+namespace App;
+
+class Autoloader
+{
+    public static function register(): void
+    {
+        spl_autoload_register(function ($class) {
+            $prefix = 'App\\';
+            $baseDir = __DIR__;
+
+            $len = strlen($prefix);
+            if (strncmp($prefix, $class, $len) !== 0) {
+                return;
+            }
+
+            $relativeClass = substr($class, $len);
+            $file = $baseDir . '/' . str_replace('\\', '/', $relativeClass) . '.php';
+
+            if (file_exists($file)) {
+                require $file;
+            }
+        });
+    }
+}

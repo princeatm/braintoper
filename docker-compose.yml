@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: braintoper_mysql
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - braintoper_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: braintoper_php
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      - DB_HOST=mysql
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "9000:9000"
+    networks:
+      - braintoper_network
+
+  nginx:
+    image: nginx:latest
+    container_name: braintoper_nginx
+    depends_on:
+      - php
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - .:/var/www/html
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - braintoper_network
+
+  websocket:
+    image: node:18-alpine
+    container_name: braintoper_websocket
+    working_dir: /app
+    volumes:
+      - ./websocket:/app
+    ports:
+      - "8080:8080"
+    command: npm install && npm start
+    networks:
+      - braintoper_network
+
+volumes:
+  mysql_data:
+
+networks:
+  braintoper_network:
+    driver: bridge

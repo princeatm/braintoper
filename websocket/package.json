@@ -1,0 +1,29 @@
+{
+  "name": "braintoper-websocket",
+  "version": "1.0.0",
+  "description": "WebSocket server for BrainToper online exam portal",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "NODE_ENV=development node server.js",
+    "prod": "NODE_ENV=production node server.js"
+  },
+  "keywords": [
+    "websocket",
+    "exam",
+    "realtime",
+    "braintoper"
+  ],
+  "author": "BrainToper",
+  "license": "MIT",
+  "dependencies": {
+    "ws": "^8.13.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  }
+}

@@ -1,0 +1,71 @@
+# .gitignore - BrainToper
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Dependencies
+/vendor/
+/node_modules/
+composer.lock
+package-lock.json
+yarn.lock
+
+# Storage
+/storage/logs/*
+!/storage/logs/.gitkeep
+/storage/uploads/*
+!/storage/uploads/.gitkeep
+/storage/cache/*
+!/storage/cache/.gitkeep
+
+# OS Files
+*.exe
+*.o
+.bash_history
+
+# Database
+*.sql
+!database/migrations/*.sql
+
+# Temporary Files
+*.tmp
+*.temp
+.tmp/
+
+# Build Artifacts
+/dist/
+/build/
+*.tar.gz
+*.zip
+
+# Secret Files
+*.key
+*.pem
+*.crt
+*.pfx
+
+# Application Logs
+*.log
+
+# Config Backups
+*.bak
+*.backup
+
+# Testing
+.phpunit.result.cache
+/tests/coverage/
+
+# WebSocket
+websocket/node_modules/
+websocket/.env
