@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
+    nginx \
     zip \
     unzip \
     supervisor \
@@ -46,7 +47,11 @@ RUN mkdir -p storage logs && \
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Expose port
-EXPOSE 9000
+# Copy entrypoint script
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
-CMD ["php-fpm"]
+# Expose port
+EXPOSE 80
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
