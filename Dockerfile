@@ -38,8 +38,9 @@ WORKDIR /var/www/html
 # Copy application
 COPY . .
 
-# Set permissions
-RUN chown -R www-data:www-data /var/www/html && \
+# Create required directories and set permissions
+RUN mkdir -p storage logs && \
+    chown -R www-data:www-data /var/www/html && \
     chmod -R 755 storage logs
 
 # Install PHP dependencies
