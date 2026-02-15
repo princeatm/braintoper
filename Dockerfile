@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
     git \
-    mysql-client \
+    mariadb-client \
     libpq-dev \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
