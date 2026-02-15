@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     git \
     mariadb-client \
+    libcurl4-openssl-dev \
     libpq-dev \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
