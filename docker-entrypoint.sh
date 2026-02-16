@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Enable debug mode for troubleshooting
+export APP_DEBUG=true
+
 echo "🚀 Starting Braintoper initialization..."
 
 # Wait for database to be ready (with retries)

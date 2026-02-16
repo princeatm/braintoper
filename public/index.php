@@ -82,8 +82,13 @@ try {
 }
 
 // CSRF protection on POST requests
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    \App\Middleware\CSRFMiddleware::verify();
+try {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        \App\Middleware\CSRFMiddleware::verify();
+    }
+} catch (Exception $e) {
+    error_log("CSRF check failed: " . $e->getMessage());
+    // Don't crash on CSRF check failure
 }
 
 // Create router and register routes
@@ -120,14 +125,26 @@ $router->add('GET', '/dashboard/admin', 'AdminDashboardController', 'show');
 $router->add('GET', '/api/admin/students', 'AdminDashboardController', 'manageStudents');
 $router->add('GET', '/api/admin/teachers', 'AdminDashboardController', 'manageTeachers');
 
-// Dispatch the request
+// Dispatch the request with comprehensive error handling
 try {
     $router->dispatch();
 } catch (\Exception $e) {
-    \App\Helpers\Logger::error('Application error', $e);
-    header('HTTP/1.0 500 Internal Server Error');
-    if (getenv('APP_DEBUG') === 'true') {
-        die('Error: ' . $e->getMessage());
+    error_log("Router dispatch error: " . $e->getMessage() . " - " . $e->getFile() . ":" . $e->getLine());
+    
+    // Try to set proper HTTP status
+    if (strpos($e->getMessage(), 'Route not found') !== false) {
+        http_response_code(404);
+        header('Content-Type: text/html');
+        echo '<h1>404 - Page Not Found</h1><p>The requested page does not exist.</p>';
+    } else {
+        http_response_code(500);
+        header('Content-Type: text/html');
+        if (getenv('APP_DEBUG') === 'true' || getenv('APP_DEBUG') === '1') {
+            echo '<h1>500 - Server Error</h1>';
+            echo '<p>Error: ' . htmlspecialchars($e->getMessage()) . '</p>';
+            echo '<p>File: ' . htmlspecialchars($e->getFile()) . ':' . $e->getLine() . '</p>';
+        } else {
+            echo '<h1>500 - Server Error</h1><p>An error occurred. Please try again later.</p>';
+        }
     }
-    die('An error occurred. Please try again later.');
 }
