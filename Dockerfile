@@ -30,14 +30,8 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg && \
     curl \
     opcache
 
-# Configure PHP-FPM to use Unix socket
-RUN sed -i 's/^listen = 127.0.0.1:9000/listen = \/var\/run\/php-fpm.sock/' \
-    /usr/local/etc/php-fpm.d/www.conf && \
-    sed -i 's/^;listen.owner = www-data/listen.owner = www-data/' \
-    /usr/local/etc/php-fpm.d/www.conf && \
-    sed -i 's/^;listen.group = www-data/listen.group = www-data/' \
-    /usr/local/etc/php-fpm.d/www.conf && \
-    sed -i 's/^;listen.mode = 0660/listen.mode = 0666/' \
+# Configure PHP-FPM to listen on TCP port
+RUN sed -i 's/^listen = 127.0.0.1:9000/listen = 9000/' \
     /usr/local/etc/php-fpm.d/www.conf
 
 # Install Composer

@@ -41,16 +41,8 @@ else
     exit 1
 fi
 
-# Give PHP-FPM time to create the socket
-sleep 1
-
-# Check if socket exists
-if [ -S /var/run/php-fpm.sock ]; then
-    echo "✅ PHP-FPM socket is ready at /var/run/php-fpm.sock"
-    ls -la /var/run/php-fpm.sock
-else
-    echo "⚠️  PHP-FPM socket not found, but continuing anyway..."
-fi
+# Give PHP-FPM time to be ready
+sleep 2
 
 # Start Nginx in foreground (so container doesn't exit)
 echo "🌐 Starting Nginx..."
