@@ -13,7 +13,7 @@ while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
     fi
     RETRY_COUNT=$((RETRY_COUNT + 1))
     echo "⏳ Database not ready yet... retry $RETRY_COUNT/$MAX_RETRIES"
-    sleep 2
+   sleep 2
 done
 
 # Initialize database (optional - continue even if it fails)
@@ -24,25 +24,33 @@ else
     echo "⚠️  Database not available, skipping initialization"
 fi
 
-# Ensure socket directory exists with proper permissions
-mkdir -p /var/run
+# Setup runtime directories
+echo "🔧 Setting up runtime directories..."
+mkdir -p /var/run /var/log/php-fpm /var/log/nginx
 chmod 755 /var/run
 
-# Start PHP-FPM in background (daemonize mode)
+# Start PHP-FPM
 echo "🔧 Starting PHP-FPM..."
 php-fpm --daemonize --fpm-config /usr/local/etc/php-fpm.conf
+php_status=$?
 
-# Wait for PHP-FPM socket to be created
-echo "⏳ Waiting for PHP-FPM socket to be ready..."
-for i in {1..30}; do
-    if [ -S /var/run/php-fpm.sock ]; then
-        echo "✅ PHP-FPM socket is ready!"
-        ls -la /var/run/php-fpm.sock
-        break
-    fi
-    echo "⏳ Waiting for socket... ($i/30)"
-    sleep 1
-done
+if [ $php_status -eq 0 ]; then
+    echo "✅ PHP-FPM started successfully"
+else
+    echo "❌ PHP-FPM failed to start with exit code: $php_status"
+    exit 1
+fi
+
+# Give PHP-FPM time to create the socket
+sleep 1
+
+# Check if socket exists
+if [ -S /var/run/php-fpm.sock ]; then
+    echo "✅ PHP-FPM socket is ready at /var/run/php-fpm.sock"
+    ls -la /var/run/php-fpm.sock
+else
+    echo "⚠️  PHP-FPM socket not found, but continuing anyway..."
+fi
 
 # Start Nginx in foreground (so container doesn't exit)
 echo "🌐 Starting Nginx..."
