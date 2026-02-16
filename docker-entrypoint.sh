@@ -18,9 +18,9 @@ done
 
 # Initialize database (optional - MUST NOT fail or crash container)
 if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
-    echo "📊 Initializing database schema..."
-    # Run seed script but suppress all errors - it's optional
-    php /var/www/html/database/seeds/seed.php > /dev/null 2>&1 || true
+    echo "📊 Initializing database..."
+    # Run initialization script but suppress all errors - it's optional
+    php /var/www/html/database/init.php > /dev/null 2>&1 || true
     echo "⚠️  Database initialization attempted (may have warnings but container continues)"
 else
     echo "⚠️  Database not available, skipping initialization"
