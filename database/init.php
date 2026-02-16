@@ -5,14 +5,26 @@
  */
 
 // Load environment
-if (file_exists(__DIR__ . '/../../.env')) {
-    $lines = file(__DIR__ . '/../../.env');
+// Support Railway's native environment variables
+$_ENV['DB_HOST'] = getenv('DATABASE_URL_HOST') ?: (getenv('DB_HOST') ?: 'localhost');
+$_ENV['DB_PORT'] = getenv('DATABASE_URL_PORT') ?: (getenv('DB_PORT') ?: 3306);
+$_ENV['DB_NAME'] = getenv('DATABASE_URL_DATABASE') ?: (getenv('DB_NAME') ?: 'braintoper');
+$_ENV['DB_USER'] = getenv('DATABASE_URL_USER') ?: (getenv('DB_USER') ?: 'root');
+$_ENV['DB_PASS'] = getenv('DATABASE_URL_PASSWORD') ?: (getenv('DB_PASS') ?: '');
+
+// Load additional config from .env if it exists
+if (file_exists(__DIR__ . '/../.env')) {
+    $lines = file(__DIR__ . '/../.env');
     foreach ($lines as $line) {
         $line = trim($line);
         if (empty($line) || $line[0] === '#') continue;
         if (strpos($line, '=') !== false) {
             list($key, $value) = explode('=', $line, 2);
-            $_ENV[trim($key)] = trim($value);
+            $key = trim($key);
+            // Skip database vars
+            if (!in_array(trim($key), ['DB_HOST', 'DB_PORT', 'DB_NAME', 'DB_USER', 'DB_PASS'])) {
+                $_ENV[trim($key)] = trim($value);
+            }
         }
     }
 }

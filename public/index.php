@@ -12,7 +12,22 @@ if (getenv('APP_DEBUG') === 'true' || getenv('APP_DEBUG') === '1') {
     ini_set('display_errors', 0);
 }
 
-// Load environment variables
+// Load environment variables - support both .env files and native environment
+// First, load from actual environment (Railway uses native env vars)
+$dbHost = getenv('DATABASE_URL_HOST') ?: (getenv('DB_HOST') ?: 'localhost');
+$dbPort = getenv('DATABASE_URL_PORT') ?: (getenv('DB_PORT') ?: 3306);
+$dbName = getenv('DATABASE_URL_DATABASE') ?: (getenv('DB_NAME') ?: 'braintoper');
+$dbUser = getenv('DATABASE_URL_USER') ?: (getenv('DB_USER') ?: 'root');
+$dbPass = getenv('DATABASE_URL_PASSWORD') ?: (getenv('DB_PASS') ?: '');
+
+// Set into $_ENV for compatibility
+$_ENV['DB_HOST'] = $dbHost;
+$_ENV['DB_PORT'] = $dbPort;
+$_ENV['DB_NAME'] = $dbName;
+$_ENV['DB_USER'] = $dbUser;
+$_ENV['DB_PASS'] = $dbPass;
+
+// Load additional config from .env if it exists
 if (file_exists(__DIR__ . '/../.env')) {
     $lines = file(__DIR__ . '/../.env');
     foreach ($lines as $line) {
@@ -20,7 +35,12 @@ if (file_exists(__DIR__ . '/../.env')) {
         if (empty($line) || $line[0] === '#') continue;
         if (strpos($line, '=') !== false) {
             list($key, $value) = explode('=', $line, 2);
-            $_ENV[trim($key)] = trim($value);
+            $key = trim($key);
+            $value = trim($value);
+            // Skip database vars as we already set them above
+            if (!in_array($key, ['DB_HOST', 'DB_PORT', 'DB_NAME', 'DB_USER', 'DB_PASS'])) {
+                $_ENV[$key] = $value;
+            }
         }
     }
 }
@@ -49,7 +69,17 @@ session_start();
 
 // Initialize database
 $dbConfig = include APP_PATH . '/config/database.php';
-\App\Helpers\Database::init($dbConfig);
+$dbConnected = false;
+
+try {
+    \App\Helpers\Database::init($dbConfig);
+    $dbConnected = true;
+} catch (Exception $e) {
+    // Database connection failed - app will show error page but won't crash
+    error_log("Database connection failed: " . $e->getMessage());
+    // Set a flag in $_SERVER so routes can know database is unavailable
+    $_SERVER['DB_UNAVAILABLE'] = true;
+}
 
 // CSRF protection on POST requests
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
