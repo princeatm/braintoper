@@ -4,7 +4,7 @@
  * Initial setup with JSS/SSS, Grades 1-3, Arms A-C
  */
 
-require_once __DIR__ . '/../app/Autoloader.php';
+require_once __DIR__ . '/../../app/Autoloader.php';
 \App\Autoloader::register();
 
 use App\Helpers\Database;
@@ -16,8 +16,8 @@ use App\Models\Subject;
 use App\Models\User;
 
 // Load environment
-if (file_exists(__DIR__ . '/../.env')) {
-    $lines = file(__DIR__ . '/../.env');
+if (file_exists(__DIR__ . '/../../.env')) {
+    $lines = file(__DIR__ . '/../../.env');
     foreach ($lines as $line) {
         $line = trim($line);
         if (empty($line) || $line[0] === '#') continue;
@@ -29,7 +29,7 @@ if (file_exists(__DIR__ . '/../.env')) {
 }
 
 // Initialize database
-$dbConfig = include __DIR__ . '/../config/database.php';
+$dbConfig = include __DIR__ . '/../../config/database.php';
 Database::init($dbConfig);
 $pdo = Database::connect();
 
